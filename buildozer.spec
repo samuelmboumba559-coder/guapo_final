@@ -21,3 +21,5 @@ android.ant = auto
 [buildozer]
 log_level = 2
 warn_on_root = 0
+android.build_tools_version = 33.0.2
+p4a.build_tools_version = 33.0.2
