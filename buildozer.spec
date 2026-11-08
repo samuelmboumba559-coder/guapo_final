@@ -16,3 +16,6 @@ android.accept_sdk_license_agreements = True
 [buildozer]
 log_level = 2
 warn_on_root = 0
+
+[app: p4a]
+url = https://github.com/kivy/python-for-android/archive/refs/tags/v2024.1.21.zip
