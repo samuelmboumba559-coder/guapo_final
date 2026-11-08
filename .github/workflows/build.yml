@@ -16,28 +16,28 @@ jobs:
       - name: Install Buildozer
         run: |
           sudo apt-get update
-          sudo apt-get install -y zip unzip libtool libffi-dev libssl-dev libltdl-dev
+          sudo apt-get install -y zip unzip libtool libffi-dev libssl-dev
           pip install --upgrade pip
           pip install cython==0.29.33
           pip install https://github.com/kivy/buildozer/archive/master.zip
 
-      - name: Init SDK
+      - name: Init and Patch P4A to use 33.0.2
         run: |
           buildozer android debug || true
-          ls ~/.buildozer/android/platform/android-sdk/
-
-      - name: Accept all licenses
-        run: |
           SDK="$HOME/.buildozer/android/platform/android-sdk"
           mkdir -p $SDK/licenses
           echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > $SDK/licenses/android-sdk-license
           echo "d56f5187479451eabf01fb78af6dfcb131a56385" >> $SDK/licenses/android-sdk-license
           echo "24333f8a63b6825ea9c5514f83c1059b8ea3b88c" >> $SDK/licenses/android-sdk-license
-          echo "y" > $SDK/licenses/android-sdk-preview-license
-          find $SDK -name sdkmanager -type f
+          # PATCH: Force p4a to use 33.0.2 instead of 37.0.0
+          find $HOME -name "recommendations.py" | xargs sed -i 's/37.0.0/33.0.2/g' || true
+          find /opt -name "recommendations.py" 2>/dev/null | xargs sed -i 's/37.0.0/33.0.2/g' || true
+          find $HOME/.local -name "*.py" | xargs grep -l "BUILD_TOOLS" 2>/dev/null | xargs sed -i 's/37.0.0/33.0.2/g' || true
           SDKMGR=$(find $SDK -name sdkmanager -type f | head -1)
+          echo "Using sdkmanager: $SDKMGR"
           yes | $SDKMGR --licenses || true
-          $SDKMGR --install "build-tools;33.0.2" "build-tools;37.0.0" || true
+          yes | $SDKMGR --install "build-tools;33.0.2" || true
+          ls $SDK/build-tools/
 
       - name: Build final APK
         run: buildozer android debug
